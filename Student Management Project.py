@@ -1,3 +1,12 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+# Sample data storage
+students = {}
+courses = {}
+enrollments = []
+
 class Student:
     def __init__(self, name, age, studentID): # Initialise name, age, studentID et grades
         self._studentID = studentID
@@ -21,14 +30,13 @@ class Student:
         return self._studentID
 
 # création de ces deux class pour override "getAverageGrade" se qui nous permettra de modifier la class student sans modifier tous les students
-class GraduateStudent(Student):
+class GraduateStudent(Student): 
     def getAverageGrade(self):
-        return super().getAverageGrade() + 5 # Exemple : ajout de 5 point seulement au student définie dans cette class
+        return super().getAverageGrade() + 5
 
 class UndergraduateStudent(Student):
     def getAverageGrade(self):
         return super().getAverageGrade()
-
 
 class Course:
     def __init__(self, courseName, courseCode, creditHours):
@@ -37,55 +45,79 @@ class Course:
         self._creditHours = creditHours
         self._students = []
     
-    def enrollStudent(self, student):
+    def enrollStudent(self, student): # définie le student qui est enroller
         self._students.append(student)
     
-    def getEnrolledStudents(self):
+    def getEnrolledStudents(self): # va chercher le student entoller
         return [student.get_name() for student in self._students]
-
 
 class Enrollment:
     def __init__(self, student, course):
         self._student = student
         self._course = course
     
-    def register(self):
-        self._course.enrollStudent(self._student)
+    def register(self): 
+        self._course.enrollStudent(self._student) # enregistre les donnés de l'enrollement (student, course)
+
+# création d'un student
+@app.route('/students', methods=['POST']) # définie une route POST/students
+def create_student(): # fct de la requête
+    data = request.json # recup des donné envoyer
+    student_id = data['studentID']
+    if student_id in students: # vérifie si l'id existe déja
+        return jsonify({'error': 'Student already exists'}), 400
+    students[student_id] = { # ajout des "valeurs" du student au dictionnaire
+        'name': data['name'],
+        'age': data['age'],
+        'grades': []
+    }
+    return jsonify({'message': 'Student created successfully'}), 201
+
+# recup de l'id d'un student
+@app.route('/students/<student_id>', methods=['GET']) # définie une route GET/student_id
+def get_student(student_id):
+    student = students.get(student_id) # utilise get pour savoir à qui coresspond l'id récupérer
+    if not student:
+        return jsonify({'error': 'Student not found'}), 404
+    return jsonify(student)
+
+# création d'une course
+@app.route('/courses', methods=['POST']) # définie une route POST/course
+def create_course():
+    data = request.json
+    course_code = data['courseCode'] # recup des donné du course
+    if course_code in courses:
+        return jsonify({'error': 'Course already exists'}), 400
+    courses[course_code] = { # ajout des "valeurs" du course au dictionnaire
+        'courseName': data['courseName'],
+        'creditHours': data['creditHours'],
+        'students': []
+    }
+    return jsonify({'message': 'Course created successfully'}), 201
+
+# recup de l'id d'une course
+@app.route('/courses/<course_code>', methods=['GET']) # definie une route GET/course_id
+def get_course(course_id):
+    course = courses.get(course_id) # recup de l'id du course
+    if not course:
+        return jsonify({'error': 'Course not found'}), 404
+    return jsonify(course)
+
+# création d'un enrollment
+@app.route('/enrollments', methods=['POST']) # définie une route POST/enrollements
+def enroll_student():
+    data = request.json # recup des donné de enrollement
+    student_id = data['studentID'] # recup de l'id du student
+    course_code = data['courseCode'] # recup du course
+    
+    if student_id not in students:
+        return jsonify({'error': 'Student not found'}), 404
+    if course_code not in courses:
+        return jsonify({'error': 'Course not found'}), 404
+    
+    courses[course_code]['students'].append(student_id)
+    enrollments.append({'studentID': student_id, 'courseCode': course_code})
+    return jsonify({'message': 'Student enrolled successfully'}), 201
 
 if __name__ == "__main__":
-    # création d'un student
-    student1 = UndergraduateStudent("Alice", 20, "U001")
-    student2 = GraduateStudent("Bob", 25, "G001")
-    student3 = UndergraduateStudent("John", 23, "U002")
-    
-    # ajout de notes
-    student1.addGrade(85)
-    student1.addGrade(90)
-    student2.addGrade(88)
-    student2.addGrade(92)
-    student3.addGrade(34)
-    student3.addGrade(74)
-    
-    # création d'une course
-    course1 = Course("Math", "M101", 3)
-    course2 = Course("Physics", "P102", 4)
-    course3 = Course("Economie", "E103", 6)
-    
-    # ajout d'un student dans une course
-    enrollment1 = Enrollment(student1, course1)
-    enrollment2 = Enrollment(student2, course2)
-    enrollment3 = Enrollment(student3, course3)
-    
-    # enregistrement d'un student dans une course
-    enrollment1.register()
-    enrollment2.register()
-    enrollment3.register()
-    
-    # affiche les résultats
-    print(f"{student1.get_name()} has an average grade of {student1.getAverageGrade()}")
-    print(f"{student2.get_name()} has an average grade of {student2.getAverageGrade()}")
-    print(f"{student3.get_name()} has an average grade of {student3.getAverageGrade()}")
-    
-    print(f"Students enrolled in {course1._courseName}: {course1.getEnrolledStudents()}")
-    print(f"Students enrolled in {course2._courseName}: {course2.getEnrolledStudents()}")
-    print(f"Students enrolled in {course3._courseName}: {course3.getEnrolledStudents()}")
+    app.run(debug=True)
