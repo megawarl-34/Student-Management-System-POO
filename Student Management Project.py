@@ -61,16 +61,12 @@ class Enrollment:
 
 # création d'un student
 @app.route('/students', methods=['POST']) # définie une route POST/students
-def create_student(): # fct de la requête
-    data = request.json # recup des donné envoyer
+def create_student(): # fct de la requête   
+    data = request.json  # recup des donné envoyer
     student_id = data['studentID']
     if student_id in students: # vérifie si l'id existe déja
         return jsonify({'error': 'Student already exists'}), 400
-    students[student_id] = { # ajout des "valeurs" du student au dictionnaire
-        'name': data['name'],
-        'age': data['age'],
-        'grades': data['grades']
-    }
+    students[student_id] = Student(data['name'], data['age'], student_id)
     return jsonify({'message': 'Student created successfully'}), 201
 
 # recup de l'id d'un student
@@ -79,7 +75,29 @@ def get_student(student_id):
     student = students.get(student_id) # utilise get pour savoir à qui coresspond l'id récupérer
     if not student:
         return jsonify({'error': 'Student not found'}), 404
-    return jsonify(student)
+    return jsonify({'name': student.get_name(), 'age': student.get_age(), 'grades': student._grades})
+
+# création de grades
+@app.route('/students/<student_id>/grades', methods=['POST']) # définie une route POST/grades
+def add_grades(student_id):
+    student = students.get(student_id)
+    if not student:
+        return jsonify({'error': 'Student not found'}), 404
+    data = request.json
+    grades = data.get('grades', []) # recup la list des grades
+    if not isinstance(grades, list): # check si grades est une list
+        return jsonify({'error': 'Grades should be a list'}), 400
+    for grade in grades: # parcours chaque grades dans la list
+        student.addGrade(grade)
+    return jsonify({'message': 'Grades added successfully'}), 200
+
+# recup de la moyenne
+@app.route('/students/<student_id>/average', methods=['GET']) # définie une route GET/average (grades)
+def get_average_grade(student_id):
+    student = students.get(student_id)
+    if not student:
+        return jsonify({'error': 'Student not found'}), 404
+    return jsonify({'studentID': student_id, 'averageGrade': student.getAverageGrade()}) # renvoie l'id du student et sa moyenne de note (grades)
 
 # création d'une course
 @app.route('/courses', methods=['POST']) # définie une route POST/course
@@ -97,8 +115,8 @@ def create_course():
 
 # recup de l'id d'une course
 @app.route('/courses/<course_code>', methods=['GET']) # definie une route GET/course_id
-def get_course(course_id):
-    course = courses.get(course_id) # recup de l'id du course
+def get_course(course_code):
+    course = courses.get(course_code) # recup de l'id du course
     if not course:
         return jsonify({'error': 'Course not found'}), 404
     return jsonify(course)
