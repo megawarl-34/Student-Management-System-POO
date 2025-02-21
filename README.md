@@ -45,14 +45,14 @@ VOICI LA LISTE GLOBAL DES COMMANDES UTILISABLE DANS LE CODE : (les champs modifi
 
 5. Inscrire un étudiant à un cours : curl -X POST http://127.0.0.1:5000/enrollments -H "Content-Type: application/json" -d '{"studentID": "U001", "courseCode": "C001"}'
 
+6. Ajouter des notes à un étudiant : curl -X POST http://127.0.0.1:5000/students/U001/grades -H "Content-Type: application/json" -d '{"grades": [85, 90, 78]}'
+
+7. Récupérer la moyenne d’un étudiant : curl -X GET http://127.0.0.1:5000/students/U001/average
+
 ---------
 marche pas
 
-6. Récupérer les cours d’un étudiant : curl -X GET http://127.0.0.1:5000/students/U001/courses
-
-7. Ajouter des notes à un étudiant : curl -X POST http://127.0.0.1:5000/students/U001/grades -H "Content-Type: application/json" -d '{"grades": [85, 90, 78]}'
-
-8. Récupérer la moyenne d’un étudiant : curl -X GET http://127.0.0.1:5000/students/U001/average
+8. Récupérer les cours d’un étudiant : curl -X GET http://127.0.0.1:5000/students/U001/courses
 
 9. Supprimer un étudiant : curl -X DELETE http://127.0.0.1:5000/students/U001
 
