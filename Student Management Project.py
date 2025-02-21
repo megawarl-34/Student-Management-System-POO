@@ -48,7 +48,7 @@ class Course:
     def enrollStudent(self, student): # définie le student qui est enroller
         self._students.append(student)
     
-    def getEnrolledStudents(self): # va chercher le student entoller
+    def getEnrolledStudents(self): # va chercher le student enroller
         return [student.get_name() for student in self._students]
 
 class Enrollment:
@@ -69,7 +69,7 @@ def create_student(): # fct de la requête
     students[student_id] = { # ajout des "valeurs" du student au dictionnaire
         'name': data['name'],
         'age': data['age'],
-        'grades': []
+        'grades': data['grades']
     }
     return jsonify({'message': 'Student created successfully'}), 201
 
