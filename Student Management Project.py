@@ -39,7 +39,7 @@ class UndergraduateStudent(Student):
         return super().getAverageGrade()
 
 class Course:
-    def __init__(self, courseName, courseCode, creditHours):
+    def __init__(self, courseName, courseCode, creditHours): # initialization des charactéristique de course
         self._courseName = courseName
         self._courseCode = courseCode
         self._creditHours = creditHours
@@ -52,7 +52,7 @@ class Course:
         return [student.get_name() for student in self._students]
 
 class Enrollment:
-    def __init__(self, student, course):
+    def __init__(self, student, course): # initialization des charactéristique pour un enrollement
         self._student = student
         self._course = course
     
@@ -99,6 +99,16 @@ def get_average_grade(student_id):
         return jsonify({'error': 'Student not found'}), 404
     return jsonify({'studentID': student_id, 'averageGrade': student.getAverageGrade()}) # renvoie l'id du student et sa moyenne de note (grades)
 
+# recup du course du student
+@app.route('/students/<student_id>/courses', methods=['GET']) # définie une route GET/student_id/courses
+def get_student_courses(student_id):
+    if student_id not in students:
+        return jsonify({'error': 'Student not found'}), 404
+    
+    enrolled_courses = [enrollment['courseCode'] for enrollment in enrollments if enrollment['studentID'] == student_id]
+    
+    return jsonify({'studentID': student_id, 'courses': enrolled_courses})
+
 # création d'une course
 @app.route('/courses', methods=['POST']) # définie une route POST/course
 def create_course():
@@ -138,4 +148,5 @@ def enroll_student():
     return jsonify({'message': 'Student enrolled successfully'}), 201
 
 if __name__ == "__main__":
+    print("Starting Student Management System API...")
     app.run(debug=True)

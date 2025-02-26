@@ -49,14 +49,8 @@ VOICI LA LISTE GLOBAL DES COMMANDES UTILISABLE DANS LE CODE : (les champs modifi
 
 7. Récupérer la moyenne d’un étudiant : curl -X GET http://127.0.0.1:5000/students/U001/average
 
----------
-marche pas
-
 8. Récupérer les cours d’un étudiant : curl -X GET http://127.0.0.1:5000/students/U001/courses
 
-9. Supprimer un étudiant : curl -X DELETE http://127.0.0.1:5000/students/U001
-
-10. Supprimer un cours : curl -X DELETE http://127.0.0.1:5000/courses/C001
 
 
 VOICI UN TUTO DE CHATGPT POUR INSTALLER PYTHON3 ET FLASK :
